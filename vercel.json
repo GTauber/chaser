@@ -1,13 +1,14 @@
 {
-    "version": 2,
-    "builds": [
-      { "src": "api/send-location.js", "use": "@vercel/node" },
-      { "src": "index.html", "use": "@vercel/static" },
-      { "src": "styles.css", "use": "@vercel/static" }
-    ],
-    "routes": [
-      { "src": "/send-location", "dest": "/api/send-location.js" },
-      { "src": "/(.*)", "dest": "/index.html" }
-    ]
-  }
-  
+  "version": 2,
+  "builds": [
+    { "src": "api/send-location.js", "use": "@vercel/node" },
+    { "src": "api/get-ip-location.js", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "styles.css", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/send-location", "dest": "/api/send-location.js" },
+    { "src": "/get-ip-location", "dest": "/api/get-ip-location.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}

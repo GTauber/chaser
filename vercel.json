@@ -1,0 +1,13 @@
+{
+    "version": 2,
+    "builds": [
+      { "src": "api/send-location.js", "use": "@vercel/node" },
+      { "src": "index.html", "use": "@vercel/static" },
+      { "src": "styles.css", "use": "@vercel/static" }
+    ],
+    "routes": [
+      { "src": "/send-location", "dest": "/api/send-location.js" },
+      { "src": "/(.*)", "dest": "/index.html" }
+    ]
+  }
+  
